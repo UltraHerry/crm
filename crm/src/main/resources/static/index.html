@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+</head>
+<body>
+
+
+
+	<!--
+		$.ajax({
+				url:"",
+				type:"",
+				data:{},
+				dataType:"json",
+				success:function(response) {
+
+				}
+			})
+	-->
+
+	<script type="text/javascript" th:inline="javascript">
+		var baseUrl = /*[[${#request.getScheme() + "://" + #request.getServerName() + ":" +
+				 #request.getServerPort() + #request.getContextPath()}]]*/"";
+		document.location.href = baseUrl + "login";
+		// var url = baseUrl + "/login";
+	</script>
+</body>
+</html>
