@@ -11,6 +11,13 @@
 				 #request.getServerPort() + #request.getContextPath()}]]*/"";
 
 		$(function(){
+
+			//注册页只能独立存在，不能作为嵌套窗口，即必须作为顶级窗口存在
+			if(window.top != window){
+				//将当前窗口设置为顶级窗口
+				window.top.location = window.location;
+			}
+
 			//页面加载完毕后，清空文本框的内容
 			$("#loginAct").val("")
 			$("#loginPwd").val("")
@@ -61,7 +68,7 @@
 					 */
 					if(response.success){
 						//跳转到欢迎页面
-						window.location = baseUrl + "/workbench/index"
+						window.location = baseUrl + "/page/workbench/index"
 					}else {
 						//存放错误信息
 						$("#msg").html(response.msg);

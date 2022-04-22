@@ -1,24 +1,29 @@
-#\u914D\u7F6E\u9879\u76EE\u6839\u8DEF\u5F84
 server:
   servlet:
+    #set context-path
     context-path: /crm
-    #配置字符集过滤器
+    #set characterEncodingFilter
     encoding:
       charset: utf-8
       force: true
 
-#\u914D\u7F6E\u6570\u636E\u5E93\u4FE1\u606F
 spring:
+  #set jdbc parameters
   datasource:
     url: jdbc:mysql://localhost:3306/crm?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
     username: root
     password: 333
     driver-class-name: com.mysql.cj.jdbc.Driver
+  thymeleaf:
+    #set thymeleaf view resolver path
+    suffix: .html
+    prefix: classpath:/templates/
 
-#\u914D\u7F6Emybatis
+#set mybatis
 mybatis:
-  #\u914D\u7F6Emapper\u6587\u4EF6\u4F4D\u7F6E
+  #mapper save location
   mapper-locations: classpath:mapper/*.xml
-  #\u914D\u7F6E\u65E5\u5FD7
+  #set mybatis log
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+

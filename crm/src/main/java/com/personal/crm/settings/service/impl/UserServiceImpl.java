@@ -6,9 +6,13 @@ import com.personal.crm.settings.domain.User;
 import com.personal.crm.settings.service.UserService;
 import com.personal.crm.utils.DateTimeUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,6 +30,10 @@ public class UserServiceImpl implements UserService {
     @Resource
     private UserDao userDao;
 
+    @Transactional(
+            isolation = Isolation.DEFAULT,
+            propagation = Propagation.SUPPORTS
+    )
     @Override
     public User login(String loginAct, String loginPwd, String ip) throws LoginException{
         Map<String , String> userMes = new HashMap<String , String>();
@@ -64,6 +72,16 @@ public class UserServiceImpl implements UserService {
             //如果当前ip是该字段的子串，说明允许访问，否则不允许
             throw new LoginException("该ip不允许访问");
         }
-        return null;
+        return user;
+    }
+
+
+    @Transactional(
+            isolation = Isolation.DEFAULT,
+            propagation = Propagation.SUPPORTS
+    )
+    @Override
+    public List<User> getUserList() {
+        return userDao.getUserList();
     }
 }

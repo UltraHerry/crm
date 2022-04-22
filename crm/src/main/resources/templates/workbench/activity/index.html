@@ -1,25 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
+	<base th:href="${#request.getContextPath()} + '/'">
+	<meta charset="UTF-8">
+	<link href="jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+	<link href="jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet">
 
-<link href="../../jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
-<link href="../../jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="jquery/jquery-1.11.1-min.js"></script>
 
-<script type="text/javascript" src="../../jquery/jquery-1.11.1-min.js"></script>
-<script type="text/javascript" src="../../jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../../jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
-<script type="text/javascript" src="../../jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
+	<!--bootstrap框架的js导入必须要在jquery下，他很大程度上是基于jquery-->
+	<!--导入加载一般也是自上而下依次加载-->
+	<script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+	<script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
 
-<script type="text/javascript">
+	<script type="text/javascript" th:inline="javascript">
 
-	$(function(){
-		
-		
-		
-	});
-	
-</script>
+
+		$(function(){
+			//为’创建活动‘按钮绑定事件
+			$("#createActivityBtn").click(function(){
+
+				//设置时间选择器，bootstrap的插件
+				$(".time").datetimepicker({
+					minView:"month",
+					language: "zh-CN",
+					format: "yyyy-mm-dd",
+					autoclose: true,
+					todayBtn: true,
+					pickerPosition:"bottom-left"
+				})
+
+				/*
+					操作模态窗口：
+						找到模态窗口的jquery对象
+						调用modal()方法
+							参数：show/hide，表示打开/隐藏
+				 */
+				//使用ajax从后台拉取数据，初始化模态窗口
+				$.ajax({
+					url: 'workbench/activity/userList',
+					dataType: 'json',
+					type:'get',
+					success: function(data){
+						/*
+							返回一个List<User>转成的json数组[{user} , {user} , {user}]
+							遍历数组，获取每个json数据
+							如下，index和userJson分别表示数组中的下标和每个用户对象转成的json
+						 */
+						var html = "<option>---请选择---</option>";
+						$.each(data, function(index , userJson) {
+							html += "<option value='" + userJson.id + "'>" + userJson.name + "</option>";
+						})
+						$("#create-marketActivityOwner").html(html);
+
+						//设置默认选中当前登录用户
+						var currentUserId = /*[[${session.user?.id}]]*/"user";
+						$("#create-marketActivityOwner").val(currentUserId);
+					}
+				})
+				//打开模块窗口
+				$("#createActivityModal").modal("show");
+			})
+
+			$("#saveActivityBtn").click(function(){
+				//发送ajax请求，执行添加操作
+				$.ajax({
+					url:"workbench/activity/info",
+					type:"post",
+					data:{
+						owner:$.trim($("#create-marketActivityOwner").val()),
+						name:$.trim($("#create-marketActivityName").val()),
+						startDate:$("#create-startTime").val(),
+						endDate:$("#create-endTime").val(),
+						cost:$.trim($("#create-cost").val()),
+						description:$.trim($("#create-describe").val())
+					},
+					dataType:"json",
+					success:function(response) {
+						/*
+							返回值：{"success":true/false}
+						 */
+						if (response.success) {
+							//添加成功，刷新市场活动信息表，关闭模态窗口
+							//关闭模态窗口
+							$("#createActivityModal").modal("hide");
+						}else {
+							alert(response.error);
+						}
+					}
+				})
+
+			})
+
+		});
+
+	</script>
 </head>
 <body>
 
@@ -40,10 +116,13 @@
 						<div class="form-group">
 							<label for="create-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
+								<!--后台数据库获取数据-->
 								<select class="form-control" id="create-marketActivityOwner">
+									<!--
 								  <option>zhangsan</option>
 								  <option>lisi</option>
 								  <option>wangwu</option>
+								    -->
 								</select>
 							</div>
                             <label for="create-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
@@ -55,11 +134,12 @@
 						<div class="form-group">
 							<label for="create-startTime" class="col-sm-2 control-label">开始日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-startTime">
+								<!--添加多个class-->
+								<input type="text" class="form-control time" id="create-startTime" placeholder="点击选择日期..." readonly>
 							</div>
 							<label for="create-endTime" class="col-sm-2 control-label">结束日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-endTime">
+								<input type="text" class="form-control time" id="create-endTime" placeholder="点击选择日期..." readonly>
 							</div>
 						</div>
                         <div class="form-group">
@@ -80,8 +160,8 @@
 					
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal">保存</button>
+					<button type="button" class="btn btn-default">关闭</button>
+					<button type="button" class="btn btn-primary" id="saveActivityBtn">保存</button>
 				</div>
 			</div>
 		</div>
@@ -186,7 +266,7 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">开始日期</div>
-					  <input class="form-control" type="text" id="startTime" />
+					  <input class="form-control" type="text" id="startTime">
 				    </div>
 				  </div>
 				  <div class="form-group">
@@ -202,8 +282,18 @@
 			</div>
 			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 5px;">
 				<div class="btn-group" style="position: relative; top: 18%;">
-				  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createActivityModal"><span class="glyphicon glyphicon-plus"></span> 创建</button>
-				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
+
+					<!--
+						点击创建按钮，观察两个属性值
+							data-toggle = modal，表示想要打开来一个模态窗口
+							data-target = "#createActivityModal"，表示将要打开的模态窗口的id #id
+
+						如下是以属性和属性值的形式设置模态窗口，这样操作有问题
+							问题在于，没有办法扩充按钮功能
+							所以实际开发中，模态窗口的设置一般通过js代码来操作
+					-->
+				  <button type="button" id="createActivityBtn" class="btn btn-primary" ><span class="glyphicon glyphicon-plus"></span> 创建</button>
+				  <button type="button" class="btn btn-default" ><span class="glyphicon glyphicon-pencil"></span> 修改</button>
 				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>
 				
@@ -212,7 +302,7 @@
 				<table class="table table-hover">
 					<thead>
 						<tr style="color: #B3B3B3;">
-							<td><input type="checkbox" /></td>
+							<td><input type="checkbox"></td>
 							<td>名称</td>
                             <td>所有者</td>
 							<td>开始日期</td>
@@ -221,15 +311,15 @@
 					</thead>
 					<tbody>
 						<tr class="active">
-							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>
+							<td><input type="checkbox"></td>
+							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='page/workbench/activity/detail';">发传单</a></td>
                             <td>zhangsan</td>
 							<td>2020-10-10</td>
 							<td>2020-10-20</td>
 						</tr>
                         <tr class="active">
-                            <td><input type="checkbox" /></td>
-                            <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>
+                            <td><input type="checkbox"></td>
+                            <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='page/workbench/activity/detail';">发传单</a></td>
                             <td>zhangsan</td>
                             <td>2020-10-10</td>
                             <td>2020-10-20</td>

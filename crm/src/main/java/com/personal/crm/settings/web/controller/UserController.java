@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,8 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/login")
-    public Object login(String loginAct , String loginPwd , HttpServletRequest request){
+    public Object login(String loginAct , String loginPwd ,
+                        HttpServletRequest request ,HttpSession session){
         Map<String , Object> res = new HashMap<>();
         //密码加密
         loginPwd = MD5Util.getMD5(loginPwd);
@@ -40,7 +42,9 @@ public class UserController {
             user = userService.login(loginAct , loginPwd , ip);
             //业务层出错抛出自定义异常，程序执行到此处说明业务层运行正常没有异常发生，也就是user不可能为0
             //使用session保存用户信息，返回信息为{"success":true}
-            request.getSession().setAttribute("user" , user);
+            session.setAttribute("user" , user);
+
+            //System.out.println(session.getAttribute("user").toString());
             res.put("success" , true);
         }catch (Exception e){
             e.printStackTrace();

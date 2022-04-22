@@ -22,7 +22,8 @@
 	<script type="text/javascript" th:inline="javascript">
 		var baseUrl = /*[[${#request.getScheme() + "://" + #request.getServerName() + ":" +
 				 #request.getServerPort() + #request.getContextPath()}]]*/"";
-		document.location.href = baseUrl + "login";
+		document.location.href = baseUrl + "page/workbench/index";
+		//"page/settings/login";
 		// var url = baseUrl + "/login";
 	</script>
 </body>
