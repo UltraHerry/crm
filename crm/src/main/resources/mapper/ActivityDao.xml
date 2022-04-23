@@ -28,4 +28,61 @@
             #{createBy}
         )
     </insert>
+
+    <select id="getActivityTotal" parameterType="com.personal.crm.workbench.vo.QueryConditions" resultType="Integer">
+        select count(*) from tbl_activity a join t_user u on a.owner = u.id
+        <where>
+            <if test="name != null and name != ''">
+                and a.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="owner != null and owner != ''">
+                and u.name like CONCAT('%',#{owner},'%')
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and a.startDate &gt; #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and a.endDate &lt; #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="getActivity" parameterType="com.personal.crm.workbench.vo.QueryConditions" resultType="com.personal.crm.workbench.domain.Activity">
+        select
+            a.id,
+            u.name as owner,
+            a.name,
+            a.startDate,
+            a.endDate
+        from tbl_activity a join t_user u on a.owner = u.id
+        <where>
+            <if test="name != null and name != ''">
+                and a.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="owner != null and owner != ''">
+                and u.name like CONCAT('%',#{owner},'%')
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and a.startDate &gt; #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and a.endDate &lt; #{endDate}
+            </if>
+        </where>
+        <if test="order != null and order !=''">
+            order by a.createTime ${order}
+        </if>
+        <if test="limit != null and limit != ''">
+            limit #{skipCount} , #{pageSize}
+        </if>
+    </select>
+
+
+    <delete id="deleteActivitiesByIds">
+        delete from tbl_activity
+        where tbl_activity.id in
+        <foreach collection="array" item="ids" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
 </mapper>
